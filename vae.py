@@ -62,7 +62,7 @@ outputs = decoder_out(h_p)
 def vae_loss(y_true, y_pred):
     """ Calculate loss = reconstruction loss + KL loss for each data in minibatch """
     # E[log P(X|z)]
-    recon = K.sum(K.square(y_true - y_pred), axis=1)
+    recon = K.sum(K.binary_crossentropy(y_pred, y_true), axis=1)
     # D_KL(Q(z|X) || P(z)); calculate in closed form as both dist. are Gaussian
     kl = 0.5 * K.sum(K.exp(log_sigma) + K.square(mu) - 1. - log_sigma, axis=1)
 
