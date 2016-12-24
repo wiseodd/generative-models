@@ -69,10 +69,6 @@ def discriminator(x):
     return D_prob, D_logit
 
 
-def dc_generator(z):
-    pass
-
-
 def dc_discriminator(x):
     x = tf.reshape(x, shape=[-1, 28, 28, 1])
     conv1 = tf.nn.relu(tf.nn.conv2d(x, DC_D_W1, strides=[1, 2, 2, 1], padding='SAME') + DC_D_b1)
@@ -126,8 +122,8 @@ mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
 sess = tf.Session()
 sess.run(tf.initialize_all_variables())
 
-if not os.path.exists('../out/'):
-    os.makedirs('../out/')
+if not os.path.exists('out/'):
+    os.makedirs('out/')
 
 i = 0
 
@@ -136,7 +132,7 @@ for it in range(1000000):
         samples = sess.run(G_sample, feed_dict={Z: sample_Z(16, Z_dim)})
 
         fig = plot(samples)
-        plt.savefig('../out/{}.png'.format(str(i).zfill(3)), bbox_inches='tight')
+        plt.savefig('out/{}.png'.format(str(i).zfill(3)), bbox_inches='tight')
         i += 1
         plt.close(fig)
 

@@ -20,7 +20,7 @@ m = 50
 n_x = X_train.shape[1]
 n_y = y_train.shape[1]
 n_z = 2
-n_epoch = 10
+n_epoch = 20
 
 
 # Q(z|X,y) -- encoder
@@ -109,7 +109,7 @@ plt.show()
 
 
 # Generating new samples from latent space; P(X|z,y) visualization
-y_label = 1
+y_label = 5
 
 z_sample = np.random.randn(n, n_z)
 y = np.zeros(shape=(n, n_y))
