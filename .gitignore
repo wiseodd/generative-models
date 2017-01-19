@@ -90,3 +90,4 @@ ENV/
 
 *.sublime*
 MNIST_data/
+GAN/out/
