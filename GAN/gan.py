@@ -34,21 +34,6 @@ G_b2 = tf.Variable(tf.zeros(shape=[784]))
 theta_G = [G_W1, G_W2, G_b1, G_b2]
 
 
-DC_D_W1 = tf.Variable(xavier_init([5, 5, 1, 16]))
-DC_D_b1 = tf.Variable(tf.zeros(shape=[16]))
-
-DC_D_W2 = tf.Variable(xavier_init([3, 3, 16, 32]))
-DC_D_b2 = tf.Variable(tf.zeros(shape=[32]))
-
-DC_D_W3 = tf.Variable(xavier_init([7 * 7 * 32, 128]))
-DC_D_b3 = tf.Variable(tf.zeros(shape=[128]))
-
-DC_D_W4 = tf.Variable(xavier_init([128, 1]))
-DC_D_b4 = tf.Variable(tf.zeros(shape=[1]))
-
-theta_DC_D = [DC_D_W1, DC_D_b1, DC_D_W2, DC_D_b2, DC_D_W3, DC_D_b3, DC_D_W4, DC_D_b4]
-
-
 def sample_Z(m, n):
     return np.random.uniform(-1., 1., size=[m, n])
 
@@ -69,18 +54,6 @@ def discriminator(x):
     return D_prob, D_logit
 
 
-def dc_discriminator(x):
-    x = tf.reshape(x, shape=[-1, 28, 28, 1])
-    conv1 = tf.nn.relu(tf.nn.conv2d(x, DC_D_W1, strides=[1, 2, 2, 1], padding='SAME') + DC_D_b1)
-    conv2 = tf.nn.relu(tf.nn.conv2d(conv1, DC_D_W2, strides=[1, 2, 2, 1], padding='SAME') + DC_D_b2)
-    conv2 = tf.reshape(conv2, shape=[-1, 7 * 7 * 32])
-    h = tf.nn.relu(tf.matmul(conv2, DC_D_W3) + DC_D_b3)
-    logit = tf.matmul(h, DC_D_W4) + DC_D_b4
-    prob = tf.nn.sigmoid(logit)
-
-    return prob, logit
-
-
 def plot(samples):
     fig = plt.figure(figsize=(4, 4))
     gs = gridspec.GridSpec(4, 4)
@@ -98,8 +71,8 @@ def plot(samples):
 
 
 G_sample = generator(Z)
-D_real, D_logit_real = dc_discriminator(X)
-D_fake, D_logit_fake = dc_discriminator(G_sample)
+D_real, D_logit_real = discriminator(X)
+D_fake, D_logit_fake = discriminator(G_sample)
 
 # D_loss = -tf.reduce_mean(tf.log(D_real) + tf.log(1. - D_fake))
 # G_loss = -tf.reduce_mean(tf.log(D_fake))
@@ -111,7 +84,7 @@ D_loss_fake = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(D_logit_fak
 D_loss = D_loss_real + D_loss_fake
 G_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(D_logit_fake, tf.ones_like(D_logit_fake)))
 
-D_solver = tf.train.AdamOptimizer().minimize(D_loss, var_list=theta_DC_D)
+D_solver = tf.train.AdamOptimizer().minimize(D_loss, var_list=theta_D)
 G_solver = tf.train.AdamOptimizer().minimize(G_loss, var_list=theta_G)
 
 mb_size = 128
@@ -128,7 +101,7 @@ if not os.path.exists('out/'):
 i = 0
 
 for it in range(1000000):
-    if it % 100 == 0:
+    if it % 1000 == 0:
         samples = sess.run(G_sample, feed_dict={Z: sample_Z(16, Z_dim)})
 
         fig = plot(samples)
@@ -141,7 +114,7 @@ for it in range(1000000):
     _, D_loss_curr = sess.run([D_solver, D_loss], feed_dict={X: X_mb, Z: sample_Z(mb_size, Z_dim)})
     _, G_loss_curr = sess.run([G_solver, G_loss], feed_dict={Z: sample_Z(mb_size, Z_dim)})
 
-    if it % 100 == 0:
+    if it % 1000 == 0:
         print('Iter: {}'.format(it))
         print('D loss: {:.4}'. format(D_loss_curr))
         print('G_loss: {:.4}'.format(G_loss_curr))

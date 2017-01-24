@@ -105,7 +105,7 @@ if not os.path.exists('out/'):
 i = 0
 
 for it in range(1000000):
-    if it % 100 == 0:
+    if it % 1000 == 0:
         n_sample = 16
 
         Z_sample = sample_Z(n_sample, Z_dim)
@@ -125,7 +125,7 @@ for it in range(1000000):
     _, D_loss_curr = sess.run([D_solver, D_loss], feed_dict={X: X_mb, Z: Z_sample, y:y_mb})
     _, G_loss_curr = sess.run([G_solver, G_loss], feed_dict={Z: Z_sample, y:y_mb})
 
-    if it % 100 == 0:
+    if it % 1000 == 0:
         print('Iter: {}'.format(it))
         print('D loss: {:.4}'. format(D_loss_curr))
         print('G_loss: {:.4}'.format(G_loss_curr))
