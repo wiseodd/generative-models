@@ -1,5 +1,5 @@
 # Generative Models
-Collection of generative models, e.g. GAN, VAE in Tensorflow and Keras.
+Collection of generative models, e.g. GAN, VAE in Tensorflow, Keras, and Pytorch.
 
 ## What's in it?
 
