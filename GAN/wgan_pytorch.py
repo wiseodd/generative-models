@@ -46,30 +46,34 @@ D_solver = optim.RMSprop(D.parameters(), lr=lr)
 
 
 for it in range(1000000):
-    # Sample data
-    z = Variable(torch.randn(mb_size, z_dim))
-    X, _ = mnist.train.next_batch(mb_size)
-    X = Variable(torch.from_numpy(X))
+    for _ in range(5):
+        # Sample data
+        z = Variable(torch.randn(mb_size, z_dim))
+        X, _ = mnist.train.next_batch(mb_size)
+        X = Variable(torch.from_numpy(X))
 
-    # Dicriminator forward-loss-backward-update
-    G_sample = G(z)
-    D_real = D(X)
-    D_fake = D(G_sample)
+        # Dicriminator forward-loss-backward-update
+        G_sample = G(z)
+        D_real = D(X)
+        D_fake = D(G_sample)
 
-    D_loss = -(torch.mean(D_real) - torch.mean(D_fake))
+        D_loss = -(torch.mean(D_real) - torch.mean(D_fake))
 
-    D_loss.backward()
-    D_solver.step()
+        D_loss.backward()
+        D_solver.step()
 
-    # Weight clipping
-    for p in D.parameters():
-        p.data.clamp_(-0.01, 0.01)
+        # Weight clipping
+        for p in D.parameters():
+            p.data.clamp_(-0.01, 0.01)
 
-    # Housekeeping - reset gradient
-    reset_grad()
+        # Housekeeping - reset gradient
+        reset_grad()
 
     # Generator forward-loss-backward-update
+    X, _ = mnist.train.next_batch(mb_size)
+    X = Variable(torch.from_numpy(X))
     z = Variable(torch.randn(mb_size, z_dim))
+
     G_sample = G(z)
     D_fake = D(G_sample)
 
