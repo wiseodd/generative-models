@@ -1,4 +1,5 @@
 import torch
+import torch.nn
 import torch.nn.functional as nn
 import torch.autograd as autograd
 import torch.optim as optim
@@ -12,7 +13,7 @@ from tensorflow.examples.tutorials.mnist import input_data
 
 mnist = input_data.read_data_sets('../MNIST_data', one_hot=True)
 mb_size = 32
-Z_dim = 10
+z_dim = 10
 X_dim = mnist.train.images.shape[1]
 y_dim = mnist.train.labels.shape[1]
 h_dim = 128
@@ -20,66 +21,33 @@ cnt = 0
 lr = 1e-4
 
 
-def xavier_init(size):
-    in_dim = size[0]
-    xavier_stddev = 1. / np.sqrt(in_dim / 2.)
-    return Variable(torch.randn(*size) * xavier_stddev, requires_grad=True)
+G = torch.nn.Sequential(
+    torch.nn.Linear(z_dim, h_dim),
+    torch.nn.ReLU(),
+    torch.nn.Linear(h_dim, X_dim),
+    torch.nn.Sigmoid()
+)
 
 
-def create_bias(size):
-    return Variable(torch.zeros(mb_size, size), requires_grad=True)
-
-
-""" ==================== GENERATOR ======================== """
-
-Wzh = xavier_init(size=[Z_dim, h_dim])
-bzh = create_bias(h_dim)
-
-Whx = xavier_init(size=[h_dim, X_dim])
-bhx = create_bias(X_dim)
-
-
-def G(z):
-    h = nn.relu(z @ Wzh + bzh)
-    X = nn.sigmoid(h @ Whx + bhx)
-    return X
-
-
-""" ==================== DISCRIMINATOR ======================== """
-
-Wxh = xavier_init(size=[X_dim, h_dim])
-bxh = create_bias(h_dim)
-
-Why = xavier_init(size=[h_dim, 1])
-bhy = create_bias(1)
-
-
-def D(X):
-    h = nn.relu(X @ Wxh + bxh)
-    y = h @ Why + bhy
-    return y
-
-
-G_params = [Wzh, bzh, Whx, bhx]
-D_params = [Wxh, bxh, Why, bhy]
-params = G_params + D_params
-
-
-""" ===================== TRAINING ======================== """
+D = torch.nn.Sequential(
+    torch.nn.Linear(X_dim, h_dim),
+    torch.nn.ReLU(),
+    torch.nn.Linear(h_dim, 1),
+)
 
 
 def reset_grad():
-    for p in params:
-        p.grad.data.zero_()
+    G.zero_grad()
+    D.zero_grad()
 
 
-G_solver = optim.RMSprop(G_params, lr=lr)
-D_solver = optim.RMSprop(D_params, lr=lr)
+G_solver = optim.RMSprop(G.parameters(), lr=lr)
+D_solver = optim.RMSprop(D.parameters(), lr=lr)
 
 
 for it in range(1000000):
     # Sample data
-    z = Variable(torch.randn(mb_size, Z_dim))
+    z = Variable(torch.randn(mb_size, z_dim))
     X, _ = mnist.train.next_batch(mb_size)
     X = Variable(torch.from_numpy(X))
 
@@ -94,14 +62,14 @@ for it in range(1000000):
     D_solver.step()
 
     # Weight clipping
-    for p in D_params:
+    for p in D.parameters():
         p.data.clamp_(-0.01, 0.01)
 
     # Housekeeping - reset gradient
     reset_grad()
 
     # Generator forward-loss-backward-update
-    z = Variable(torch.randn(mb_size, Z_dim))
+    z = Variable(torch.randn(mb_size, z_dim))
     G_sample = G(z)
     D_fake = D(G_sample)
 
