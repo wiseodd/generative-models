@@ -1,6 +1,8 @@
 # Generative Models
 Collection of generative models, e.g. GAN, VAE in Tensorflow, Keras, and Pytorch.
 
+Note, generated samples will be stored in `GAN/out` or `VAE/out` directory during training.
+
 ## What's in it?
 
 1. Generative Adversarial Nets (GAN)
@@ -8,6 +10,7 @@ Collection of generative models, e.g. GAN, VAE in Tensorflow, Keras, and Pytorch
   2. [Conditional GAN](https://arxiv.org/abs/1411.1784)
   3. [InfoGAN](https://arxiv.org/abs/1606.03657)
   4. [Wasserstein GAN](https://arxiv.org/abs/1701.07875)
+  5. [Mode Regularized GAN](https://arxiv.org/abs/1612.02136)
 2. Variational Autoencoder (VAE)
   1. [Vanilla VAE](https://arxiv.org/abs/1312.6114)
   2. [Conditional VAE](https://arxiv.org/abs/1406.5298)
