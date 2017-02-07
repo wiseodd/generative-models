@@ -111,7 +111,7 @@ Q_solver = tf.train.AdamOptimizer().minimize(Q_loss, var_list=theta_G + theta_Q)
 mb_size = 32
 Z_dim = 16
 
-mnist = input_data.read_data_sets('../MNIST_data', one_hot=True)
+mnist = input_data.read_data_sets('../../MNIST_data', one_hot=True)
 
 sess = tf.Session()
 sess.run(tf.initialize_all_variables())

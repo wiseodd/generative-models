@@ -92,3 +92,4 @@ ENV/
 MNIST_data/
 GAN/out/
 VAE/out/
+out/

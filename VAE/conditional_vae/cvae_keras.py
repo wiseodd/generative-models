@@ -12,7 +12,7 @@ import tensorflow as tf
 
 tf.python.control_flow_ops = tf
 
-mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
+mnist = input_data.read_data_sets('../../MNIST_data', one_hot=True)
 X_train, y_train = mnist.train.images, mnist.train.labels
 X_test, y_test = mnist.test.images, mnist.test.labels
 

@@ -11,7 +11,7 @@ X_dim = 784
 z_dim = 10
 h_dim = 128
 
-mnist = input_data.read_data_sets('../MNIST_data', one_hot=True)
+mnist = input_data.read_data_sets('../../MNIST_data', one_hot=True)
 
 
 def plot(samples):
