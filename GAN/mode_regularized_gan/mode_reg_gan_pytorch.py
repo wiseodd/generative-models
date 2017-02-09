@@ -64,7 +64,7 @@ def sample_X(size, include_y=False):
 
 E_solver = optim.Adam(E.parameters(), lr=lr)
 G_solver = optim.Adam(G.parameters(), lr=lr)
-D_solver = optim.Adam(D1.parameters(), lr=lr)
+D_solver = optim.Adam(D.parameters(), lr=lr)
 
 
 for it in range(1000000):
@@ -75,10 +75,10 @@ for it in range(1000000):
 
     # Dicriminator_1 forward-loss-backward-update
     G_sample = G(z)
-    D_real = D1(X)
-    D_fake = D1(G_sample)
+    D_real = D(X)
+    D_fake = D(G_sample)
 
-    D_loss = -torch.mean(torch.log(D1_real) + torch.log(1 - D1_fake))
+    D_loss = -torch.mean(torch.log(D_real) + torch.log(1 - D_fake))
 
     D_loss.backward()
     D_solver.step()
@@ -125,8 +125,8 @@ for it in range(1000000):
 
     # Print and plot every now and then
     if it % 1000 == 0:
-        print('Iter-{}; D1_loss: {}; E_loss: {}; G_loss: {}'
-              .format(it, D1_loss.data.numpy(), E_loss.data.numpy(), G_loss.data.numpy()))
+        print('Iter-{}; D_loss: {}; E_loss: {}; G_loss: {}'
+              .format(it, D_loss.data.numpy(), E_loss.data.numpy(), G_loss.data.numpy()))
 
         samples = G(z).data.numpy()[:16]
 
