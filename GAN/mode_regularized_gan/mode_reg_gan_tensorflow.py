@@ -9,7 +9,7 @@ import os
 mb_size = 32
 X_dim = 784
 z_dim = 10
-h_dim = 512
+h_dim = 128
 lam1 = 1e-2
 lam2 = 1e-2
 
@@ -106,8 +106,6 @@ D_solver = (tf.train.AdamOptimizer(learning_rate=1e-3)
 G_solver = (tf.train.AdamOptimizer(learning_rate=1e-3)
             .minimize(G_loss, var_list=theta_G))
 
-clip_D = [p.assign(tf.clip_by_value(p, -0.01, 0.01)) for p in theta_D]
-
 sess = tf.Session()
 sess.run(tf.initialize_all_variables())
 
@@ -119,8 +117,8 @@ i = 0
 for it in range(1000000):
     X_mb, _ = mnist.train.next_batch(mb_size)
 
-    _, D_loss_curr, _ = sess.run(
-        [D_solver, D_loss, clip_D],
+    _, D_loss_curr = sess.run(
+        [D_solver, D_loss],
         feed_dict={X: X_mb, z: sample_z(mb_size, z_dim)}
     )
 
