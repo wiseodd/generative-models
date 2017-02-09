@@ -89,6 +89,12 @@ G_solver = (tf.train.RMSPropOptimizer(learning_rate=1e-4)
 
 clip_D_W1 = D_W1.assign(tf.clip_by_value(D_W1, -0.01, 0.01))
 clip_D_W2 = D_W2.assign(tf.clip_by_value(D_W2, -0.01, 0.01))
+clip_D_b1 = D_b1.assign(tf.clip_by_value(D_b1, -0.01, 0.01))
+clip_D_b2 = D_b2.assign(tf.clip_by_value(D_b2, -0.01, 0.01))
+clip_D = tf.group(clip_D_W1,
+                  clip_D_W2,
+                  clip_D_b1,
+                  clip_D_b2)
 
 sess = tf.Session()
 sess.run(tf.initialize_all_variables())
@@ -103,7 +109,7 @@ for it in range(1000000):
         X_mb, _ = mnist.train.next_batch(mb_size)
 
         _, D_loss_curr, xx, yy = sess.run(
-            [D_solver, D_loss, clip_D_W1, clip_D_W2],
+            [D_solver, D_loss, clip_D],
             feed_dict={X: X_mb, z: sample_z(mb_size, z_dim)}
         )
 
