@@ -93,3 +93,6 @@ MNIST_data/
 GAN/out/
 VAE/out/
 out/
+
+# Unreleased
+GAN/unrolled_gan/
