@@ -16,8 +16,9 @@ Z_dim = 100
 X_dim = mnist.train.images.shape[1]
 y_dim = mnist.train.labels.shape[1]
 h_dim = 128
-cnt = 0
+c = 0
 lr = 1e-3
+noise_factor = .25
 
 
 def xavier_init(size):
@@ -30,9 +31,8 @@ def create_bias(size):
     return Variable(torch.zeros(mb_size, size), requires_grad=True)
 
 
-# =============================== Q(z|X) ======================================
-
-Wxh = xavier_init(size=[X_dim + y_dim, h_dim])
+""" Q(z|X) """
+Wxh = xavier_init(size=[X_dim, h_dim])
 bxh = create_bias(h_dim)
 
 Whz_mu = xavier_init(size=[h_dim, Z_dim])
@@ -42,9 +42,8 @@ Whz_var = xavier_init(size=[h_dim, Z_dim])
 bhz_var = create_bias(Z_dim)
 
 
-def Q(X, c):
-    inputs = torch.cat([X, c], 1)
-    h = nn.relu(inputs @ Wxh + bxh)
+def Q(X):
+    h = nn.relu(X @ Wxh + bxh)
     z_mu = h @ Whz_mu + bhz_mu
     z_var = h @ Whz_var + bhz_var
     return z_mu, z_var
@@ -55,40 +54,40 @@ def sample_z(mu, log_var):
     return mu + torch.exp(log_var / 2) * eps
 
 
-# =============================== P(X|z) ======================================
-
-Wzh = xavier_init(size=[Z_dim + y_dim, h_dim])
+""" P(X|z) """
+Wzh = xavier_init(size=[Z_dim, h_dim])
 bzh = create_bias(h_dim)
 
 Whx = xavier_init(size=[h_dim, X_dim])
 bhx = create_bias(X_dim)
 
 
-def P(z, c):
-    inputs = torch.cat([z, c], 1)
-    h = nn.relu(inputs @ Wzh + bzh)
+def P(z):
+    h = nn.relu(z @ Wzh + bzh)
     X = nn.sigmoid(h @ Whx + bhx)
     return X
 
 
-# =============================== TRAINING ====================================
-
+""" Training """
 params = [Wxh, bxh, Whz_mu, bhz_mu, Whz_var, bhz_var,
           Wzh, bzh, Whx, bhx]
 
 solver = optim.Adam(params, lr=lr)
 
 for it in range(100000):
-    X, c = mnist.train.next_batch(mb_size)
+    X, _ = mnist.train.next_batch(mb_size)
     X = Variable(torch.from_numpy(X))
-    c = Variable(torch.from_numpy(c.astype('float32')))
+
+    # Add noise
+    X_noise = X + noise_factor * Variable(torch.randn(X.size()))
+    X_noise.data.clamp_(0., 1.)
 
     # Forward
-    z_mu, z_var = Q(X, c)
+    z_mu, z_var = Q(X_noise)
     z = sample_z(z_mu, z_var)
-    X_sample = P(z, c)
+    X_sample = P(z)
 
-    # Loss
+    torch.nn.BCELoss
     recon_loss = nn.binary_cross_entropy(X_sample, X, size_average=False) / mb_size
     kl_loss = torch.mean(0.5 * torch.sum(torch.exp(z_var) + z_mu**2 - 1. - z_var, 1))
     loss = recon_loss + kl_loss
@@ -107,11 +106,8 @@ for it in range(100000):
     if it % 1000 == 0:
         print('Iter-{}; Loss: {}'.format(it, loss.data[0]))
 
-        c = np.zeros(shape=[mb_size, y_dim], dtype='float32')
-        c[:, np.random.randint(0, 10)] = 1.
-        c = Variable(torch.from_numpy(c))
         z = Variable(torch.randn(mb_size, Z_dim))
-        samples = P(z, c).data.numpy()[:16]
+        samples = P(z).data.numpy()[:16]
 
         fig = plt.figure(figsize=(4, 4))
         gs = gridspec.GridSpec(4, 4)
@@ -128,6 +124,6 @@ for it in range(100000):
         if not os.path.exists('out/'):
             os.makedirs('out/')
 
-        plt.savefig('out/{}.png'.format(str(cnt).zfill(3)), bbox_inches='tight')
-        cnt += 1
+        plt.savefig('out/{}.png'.format(str(c).zfill(3)), bbox_inches='tight')
+        c += 1
         plt.close(fig)

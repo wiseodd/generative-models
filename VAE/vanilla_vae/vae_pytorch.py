@@ -86,8 +86,8 @@ for it in range(100000):
     X_sample = P(z)
 
     # Loss
-    recon_loss = nn.binary_cross_entropy(X_sample, X, size_average=False)
-    kl_loss = 0.5 * torch.sum(torch.exp(z_var) + z_mu**2 - 1. - z_var)
+    recon_loss = nn.binary_cross_entropy(X_sample, X, size_average=False) / mb_size
+    kl_loss = torch.mean(0.5 * torch.sum(torch.exp(z_var) + z_mu**2 - 1. - z_var, 1))
     loss = recon_loss + kl_loss
 
     # Backward
@@ -102,7 +102,7 @@ for it in range(100000):
 
     # Print and plot every now and then
     if it % 1000 == 0:
-        print('Iter-{}; loss: {}'.format(it, loss))
+        print('Iter-{}; Loss: {}'.format(it, loss.data[0]))
 
         samples = P(z).data.numpy()[:16]
 
