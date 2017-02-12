@@ -26,53 +26,49 @@ def xavier_init(size):
     return Variable(torch.randn(*size) * xavier_stddev, requires_grad=True)
 
 
-def create_bias(size):
-    return Variable(torch.zeros(mb_size, size), requires_grad=True)
-
-
 """ ==================== GENERATOR ======================== """
 
 Wzh = xavier_init(size=[Z_dim + 10, h_dim])
-bzh = create_bias(h_dim)
+bzh = Variable(torch.zeros(h_dim), requires_grad=True)
 
 Whx = xavier_init(size=[h_dim, X_dim])
-bhx = create_bias(X_dim)
+bhx = Variable(torch.zeros(X_dim), requires_grad=True)
 
 
 def G(z, c):
     inputs = torch.cat([z, c], 1)
-    h = nn.relu(inputs @ Wzh + bzh)
-    X = nn.sigmoid(h @ Whx + bhx)
+    h = nn.relu(inputs @ Wzh + bzh.repeat(inputs.size(0), 1))
+    X = nn.sigmoid(h @ Whx + bhx.repeat(h.size(0), 1))
     return X
 
 
 """ ==================== DISCRIMINATOR ======================== """
 
 Wxh = xavier_init(size=[X_dim, h_dim])
-bxh = create_bias(h_dim)
+bxh = Variable(torch.zeros(h_dim), requires_grad=True)
 
 Why = xavier_init(size=[h_dim, 1])
-bhy = create_bias(1)
+bhy = Variable(torch.zeros(1), requires_grad=True)
 
 
 def D(X):
-    h = nn.relu(X @ Wxh + bxh)
-    y = nn.sigmoid(h @ Why + bhy)
+    h = nn.relu(X @ Wxh + bxh.repeat(X.size(0), 1))
+    y = nn.sigmoid(h @ Why + bhy.repeat(h.size(0), 1))
     return y
 
 
 """ ====================== Q(c|X) ========================== """
 
 Wqxh = xavier_init(size=[X_dim, h_dim])
-bqxh = create_bias(h_dim)
+bqxh = Variable(torch.zeros(h_dim), requires_grad=True)
 
 Whc = xavier_init(size=[h_dim, 10])
-bhc = create_bias(10)
+bhc = Variable(torch.zeros(10), requires_grad=True)
 
 
 def Q(X):
-    h = nn.relu(X @ Wqxh + bqxh)
-    c = nn.softmax(h @ Whc + bhc)
+    h = nn.relu(X @ Wqxh + bqxh.repeat(X.size(0), 1))
+    c = nn.softmax(h @ Whc + bhc.repeat(h.size(0), 1))
     return c
 
 

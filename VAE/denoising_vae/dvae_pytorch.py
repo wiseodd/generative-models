@@ -27,25 +27,21 @@ def xavier_init(size):
     return Variable(torch.randn(*size) * xavier_stddev, requires_grad=True)
 
 
-def create_bias(size):
-    return Variable(torch.zeros(mb_size, size), requires_grad=True)
-
-
 """ Q(z|X) """
 Wxh = xavier_init(size=[X_dim, h_dim])
-bxh = create_bias(h_dim)
+bxh = Variable(torch.zeros(h_dim), requires_grad=True)
 
 Whz_mu = xavier_init(size=[h_dim, Z_dim])
-bhz_mu = create_bias(Z_dim)
+bhz_mu = Variable(torch.zeros(Z_dim), requires_grad=True)
 
 Whz_var = xavier_init(size=[h_dim, Z_dim])
-bhz_var = create_bias(Z_dim)
+bhz_var = Variable(torch.zeros(Z_dim), requires_grad=True)
 
 
 def Q(X):
-    h = nn.relu(X @ Wxh + bxh)
-    z_mu = h @ Whz_mu + bhz_mu
-    z_var = h @ Whz_var + bhz_var
+    h = nn.relu(X @ Wxh + bxh.repeat(X.size(0), 1))
+    z_mu = h @ Whz_mu + bhz_mu.repeat(h.size(0), 1)
+    z_var = h @ Whz_var + bhz_var.repeat(h.size(0), 1)
     return z_mu, z_var
 
 
@@ -56,15 +52,15 @@ def sample_z(mu, log_var):
 
 """ P(X|z) """
 Wzh = xavier_init(size=[Z_dim, h_dim])
-bzh = create_bias(h_dim)
+bzh = Variable(torch.zeros(h_dim), requires_grad=True)
 
 Whx = xavier_init(size=[h_dim, X_dim])
-bhx = create_bias(X_dim)
+bhx = Variable(torch.zeros(X_dim), requires_grad=True)
 
 
 def P(z):
-    h = nn.relu(z @ Wzh + bzh)
-    X = nn.sigmoid(h @ Whx + bhx)
+    h = nn.relu(z @ Wzh + bzh.repeat(z.size(0), 1))
+    X = nn.sigmoid(h @ Whx + bhx.repeat(h.size(0), 1))
     return X
 
 
@@ -104,7 +100,7 @@ for it in range(100000):
 
     # Print and plot every now and then
     if it % 1000 == 0:
-        print('Iter-{}; Loss: {}'.format(it, loss.data[0]))
+        print('Iter-{}; Loss: {:.4}'.format(it, loss.data[0]))
 
         z = Variable(torch.randn(mb_size, Z_dim))
         samples = P(z).data.numpy()[:16]
