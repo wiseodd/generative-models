@@ -96,3 +96,4 @@ out/
 
 # Unreleased
 GAN/unrolled_gan/
+GAN/loss_sensitive_gan/
