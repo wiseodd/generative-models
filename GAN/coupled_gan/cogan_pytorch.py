@@ -135,21 +135,15 @@ for it in range(100000):
 
     D1_loss = torch.mean(-torch.log(D1_real + 1e-8) -
                          torch.log(1. - D1_fake + 1e-8))
-    D1_loss.backward()
-
-    # Cache grad of D's shared weights, result of D1 backprop
-    D_shared_grad = [copy.deepcopy(p.grad.data) for p in D_shared.parameters()]
-    # Reset grad of D's shared weights
-    for p in D_shared.parameters():
-        p.grad.data.zero_()
-
     D2_loss = torch.mean(-torch.log(D2_real + 1e-8) -
                          torch.log(1. - D2_fake + 1e-8))
-    D2_loss.backward()
+    D_loss = D1_loss + D2_loss
 
-    # Average the current grad and chaced grad, then assign to shared D
-    for p, g_copy in zip(D_shared.parameters(), D_shared_grad):
-        p.grad.data = 0.5 * (p.grad.data + g_copy)
+    D_loss.backward()
+
+    # Average the gradients
+    for p in D_shared.parameters():
+        p.grad.data = 0.5 * p.grad.data
 
     D_solver.step()
     reset_grad()
@@ -161,21 +155,15 @@ for it in range(100000):
     G2_sample = G2(z)
     D2_fake = D2(G2_sample)
 
-    G2_loss = torch.mean(-torch.log(D2_fake + 1e-8))
-    G2_loss.backward()
-
-    # Cache grad of G's shared weights, result of D1 backprop
-    G_shared_grad = [copy.deepcopy(p.grad.data) for p in G_shared.parameters()]
-    # Reset grad of G's shared weights
-    for p in G_shared.parameters():
-        p.grad.data.zero_()
-
     G1_loss = torch.mean(-torch.log(D1_fake + 1e-8))
-    G1_loss.backward()
+    G2_loss = torch.mean(-torch.log(D2_fake + 1e-8))
+    G_loss = G1_loss + G2_loss
 
-    # Average the current grad and chaced grad, then assign to shared D
-    for p, g_copy in zip(G_shared.parameters(), G_shared_grad):
-        p.grad.data = 0.5 * (p.grad.data + g_copy)
+    G_loss.backward()
+
+    # Average the gradients
+    for p in G_shared.parameters():
+        p.grad.data = 0.5 * p.grad.data
 
     G_solver.step()
     reset_grad()
