@@ -12,6 +12,7 @@ Collection of generative models, e.g. GAN, VAE in Tensorflow, Keras, and Pytorch
   4. [Wasserstein GAN](https://arxiv.org/abs/1701.07875)
   5. [Mode Regularized GAN](https://arxiv.org/abs/1612.02136)
   6. [Coupled GAN](https://arxiv.org/abs/1606.07536)
+  7. [Auxiliary Classifier GAN](https://arxiv.org/abs/1610.09585)
 2. Variational Autoencoder (VAE)
   1. [Vanilla VAE](https://arxiv.org/abs/1312.6114)
   2. [Conditional VAE](https://arxiv.org/abs/1406.5298)
