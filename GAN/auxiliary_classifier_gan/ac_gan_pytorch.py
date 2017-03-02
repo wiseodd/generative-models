@@ -90,7 +90,7 @@ for it in range(100000):
     # GAN's D loss
     D_loss = torch.mean(torch.log(D_real + eps) + torch.log(1 - D_fake + eps))
     # Cross entropy aux loss
-    C_loss = nn.cross_entropy(C_real, y_true) + nn.cross_entropy(C_fake, y_true)
+    C_loss = -nn.cross_entropy(C_real, y_true) - nn.cross_entropy(C_fake, y_true)
 
     # Maximize
     DC_loss = -(D_loss + C_loss)
@@ -108,7 +108,7 @@ for it in range(100000):
     # GAN's G loss
     G_loss = torch.mean(torch.log(D_fake + eps))
     # Cross entropy aux loss
-    C_loss = nn.cross_entropy(C_real, y_true) + nn.cross_entropy(C_fake, y_true)
+    C_loss = -nn.cross_entropy(C_real, y_true) - nn.cross_entropy(C_fake, y_true)
 
     # Maximize
     GC_loss = -(G_loss + C_loss)
