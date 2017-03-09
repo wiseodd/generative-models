@@ -68,11 +68,14 @@ for it in range(1000000):
     D_loss = D_real + nn.relu(m - D_fake)
 
     # Reuse D_fake for generator loss
-    D_loss.backward(retain_variables=True)
+    D_loss.backward()
     D_solver.step()
     reset_grad()
 
     # Generator
+    G_sample = G(z)
+    D_fake = D(G_sample)
+
     G_loss = D_fake
 
     G_loss.backward()
