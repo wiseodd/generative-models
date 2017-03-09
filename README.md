@@ -1,5 +1,5 @@
 # Generative Models
-Collection of generative models, e.g. GAN, VAE in Tensorflow, Keras, and Pytorch.
+Collection of generative models, e.g. GAN, VAE in Pytorch and Tensorflow.
 
 **Note:** generated samples will be stored in `GAN/{gan_model}/out` or `VAE/{vae_model}/out` directory during training.
 
