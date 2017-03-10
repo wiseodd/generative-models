@@ -37,7 +37,6 @@ D = torch.nn.Sequential(
     torch.nn.Linear(X_dim, h_dim),
     torch.nn.ReLU(),
     torch.nn.Linear(h_dim, 1),
-    # torch.nn.Sigmoid()
 )
 
 
@@ -62,6 +61,7 @@ for it in range(1000000):
     D_fake = D(G_sample)
 
     # Uncomment D_loss and its respective G_loss of your choice
+    # ---------------------------------------------------------
 
     """ Total Variation """
     # D_loss = -(torch.mean(0.5 * torch.tanh(D_real)) -
