@@ -16,6 +16,7 @@ Collection of generative models, e.g. GAN, VAE in Pytorch and Tensorflow.
   8. [Least Squares GAN](https://arxiv.org/abs/1611.04076v2)
   9. [Boundary Seeking GAN](https://arxiv.org/abs/1702.08431)
   10. [Energy Based GAN](https://arxiv.org/abs/1609.03126)
+  11. [f-GAN](https://arxiv.org/abs/1606.00709)
 2. Variational Autoencoder (VAE)
   1. [Vanilla VAE](https://arxiv.org/abs/1312.6114)
   2. [Conditional VAE](https://arxiv.org/abs/1406.5298)
