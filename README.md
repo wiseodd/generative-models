@@ -7,7 +7,7 @@ Collection of generative models, e.g. GAN, VAE in Pytorch and Tensorflow.
 
 ## What's in it?
 
-1. Generative Adversarial Nets (GAN)
+#### Generative Adversarial Nets (GAN)
   1. [Vanilla GAN](https://arxiv.org/abs/1406.2661)
   2. [Conditional GAN](https://arxiv.org/abs/1411.1784)
   3. [InfoGAN](https://arxiv.org/abs/1606.03657)
@@ -20,7 +20,7 @@ Collection of generative models, e.g. GAN, VAE in Pytorch and Tensorflow.
   10. [Energy Based GAN](https://arxiv.org/abs/1609.03126)
   11. [f-GAN](https://arxiv.org/abs/1606.00709)
   12. [Generative Adversarial Parallelization](https://arxiv.org/abs/1612.04021)
-2. Variational Autoencoder (VAE)
+#### Variational Autoencoder (VAE)
   1. [Vanilla VAE](https://arxiv.org/abs/1312.6114)
   2. [Conditional VAE](https://arxiv.org/abs/1406.5298)
   3. [Denoising VAE](https://arxiv.org/abs/1511.06406)
