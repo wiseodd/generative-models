@@ -80,11 +80,7 @@ def reset_grad():
         net.zero_grad()
 
 
-# G_AB_solver = optim.Adam(G_AB.parameters(), lr=lr)
-# G_BA_solver = optim.Adam(G_BA.parameters(), lr=lr)
 G_solver = optim.Adam(G_params, lr=lr)
-# D_A_solver = optim.Adam(D_A.parameters(), lr=lr)
-# D_B_solver = optim.Adam(D_B.parameters(), lr=lr)
 D_solver = optim.Adam(D_params, lr=lr)
 
 if not os.path.exists('out/'):
@@ -168,8 +164,8 @@ for it in range(1000000):
         input_A = sample_x(X_train1, size=4)
         input_B = sample_x(X_train2, size=4)
 
-        samples_A = G_BA(input_A).data.numpy()
-        samples_B = G_AB(input_B).data.numpy()
+        samples_A = G_BA(input_B).data.numpy()
+        samples_B = G_AB(input_A).data.numpy()
 
         input_A = input_A.data.numpy()
         input_B = input_B.data.numpy()
