@@ -34,7 +34,7 @@ theta_D = [D_W1, D_W2, D_b1, D_b2]
 
 
 def discriminator(x, y):
-    inputs = tf.concat(concat_dim=1, values=[x, y])
+    inputs = tf.concat(axis=1, values=[x, y])
     D_h1 = tf.nn.relu(tf.matmul(inputs, D_W1) + D_b1)
     D_logit = tf.matmul(D_h1, D_W2) + D_b2
     D_prob = tf.nn.sigmoid(D_logit)
@@ -55,7 +55,7 @@ theta_G = [G_W1, G_W2, G_b1, G_b2]
 
 
 def generator(z, y):
-    inputs = tf.concat(concat_dim=1, values=[z, y])
+    inputs = tf.concat(axis=1, values=[z, y])
     G_h1 = tf.nn.relu(tf.matmul(inputs, G_W1) + G_b1)
     G_log_prob = tf.matmul(G_h1, G_W2) + G_b2
     G_prob = tf.nn.sigmoid(G_log_prob)
@@ -87,17 +87,17 @@ G_sample = generator(Z, y)
 D_real, D_logit_real = discriminator(X, y)
 D_fake, D_logit_fake = discriminator(G_sample, y)
 
-D_loss_real = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(D_logit_real, tf.ones_like(D_logit_real)))
-D_loss_fake = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(D_logit_fake, tf.zeros_like(D_logit_fake)))
+D_loss_real = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=D_logit_real, labels=tf.ones_like(D_logit_real)))
+D_loss_fake = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=D_logit_fake, labels=tf.zeros_like(D_logit_fake)))
 D_loss = D_loss_real + D_loss_fake
-G_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(D_logit_fake, tf.ones_like(D_logit_fake)))
+G_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=D_logit_fake, labels=tf.ones_like(D_logit_fake)))
 
 D_solver = tf.train.AdamOptimizer().minimize(D_loss, var_list=theta_D)
 G_solver = tf.train.AdamOptimizer().minimize(G_loss, var_list=theta_G)
 
 
 sess = tf.Session()
-sess.run(tf.initialize_all_variables())
+sess.run(tf.global_variables_initializer())
 
 if not os.path.exists('out/'):
     os.makedirs('out/')

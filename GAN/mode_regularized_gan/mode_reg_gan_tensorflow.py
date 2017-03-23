@@ -107,7 +107,7 @@ G_solver = (tf.train.AdamOptimizer(learning_rate=1e-3)
             .minimize(G_loss, var_list=theta_G))
 
 sess = tf.Session()
-sess.run(tf.initialize_all_variables())
+sess.run(tf.global_variables_initializer())
 
 if not os.path.exists('out/'):
     os.makedirs('out/')

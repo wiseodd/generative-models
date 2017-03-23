@@ -125,7 +125,7 @@ G_solver = tf.group(
 )
 
 sess = tf.Session()
-sess.run(tf.initialize_all_variables())
+sess.run(tf.global_variables_initializer())
 
 X_train = mnist.train.images
 half = int(X_train.shape[0] / 2)

@@ -58,7 +58,7 @@ theta_Q = [Q_W1, Q_W2, Q_b1, Q_b2]
 
 
 def Q(X, eps):
-    inputs = tf.concat([X, eps], axis=1)
+    inputs = tf.concat(axis=1, values=[X, eps])
     h = tf.nn.relu(tf.matmul(inputs, Q_W1) + Q_b1)
     z = tf.matmul(h, Q_W2) + Q_b2
     return z
@@ -118,7 +118,7 @@ VAE_solver = tf.train.AdamOptimizer().minimize(-elbo, var_list=theta_P+theta_Q)
 D_solver = tf.train.AdamOptimizer().minimize(-D_loss, var_list=theta_D)
 
 sess = tf.Session()
-sess.run(tf.initialize_all_variables())
+sess.run(tf.global_variables_initializer())
 
 if not os.path.exists('out/'):
     os.makedirs('out/')

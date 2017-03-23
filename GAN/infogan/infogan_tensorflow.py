@@ -53,7 +53,7 @@ def sample_c(m):
 
 
 def generator(z, c):
-    inputs = tf.concat(1, [z, c])
+    inputs = tf.concat(axis=1, values=[z, c])
     G_h1 = tf.nn.relu(tf.matmul(inputs, G_W1) + G_b1)
     G_log_prob = tf.matmul(G_h1, G_W2) + G_b2
     G_prob = tf.nn.sigmoid(G_log_prob)
@@ -114,7 +114,7 @@ Z_dim = 16
 mnist = input_data.read_data_sets('../../MNIST_data', one_hot=True)
 
 sess = tf.Session()
-sess.run(tf.initialize_all_variables())
+sess.run(tf.global_variables_initializer())
 
 if not os.path.exists('out/'):
     os.makedirs('out/')
