@@ -21,6 +21,7 @@ Collection of generative models, e.g. GAN, VAE in Pytorch and Tensorflow.
   11. [f-GAN](https://arxiv.org/abs/1606.00709)
   12. [Generative Adversarial Parallelization](https://arxiv.org/abs/1612.04021)
   13. [DiscoGAN](https://arxiv.org/abs/1703.05192)
+  14. [Adversarial Feature Learning](https://arxiv.org/abs/1605.09782) & [Adversarially Learned Inference](https://arxiv.org/abs/1606.00704)
 #### Variational Autoencoder (VAE)
   1. [Vanilla VAE](https://arxiv.org/abs/1312.6114)
   2. [Conditional VAE](https://arxiv.org/abs/1406.5298)
