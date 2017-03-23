@@ -18,6 +18,10 @@ c = 0
 lr = 1e-3
 
 
+def log(x):
+    return tf.log(x + 1e-8)
+
+
 def plot(samples):
     fig = plt.figure(figsize=(4, 4))
     gs = gridspec.GridSpec(4, 4)
@@ -47,7 +51,6 @@ eps = tf.placeholder(tf.float32, shape=[None, eps_dim])
 
 Q_W1 = tf.Variable(xavier_init([X_dim + eps_dim, h_dim]))
 Q_b1 = tf.Variable(tf.zeros(shape=[h_dim]))
-
 Q_W2 = tf.Variable(xavier_init([h_dim, z_dim]))
 Q_b2 = tf.Variable(tf.zeros(shape=[z_dim]))
 
@@ -55,7 +58,7 @@ theta_Q = [Q_W1, Q_W2, Q_b1, Q_b2]
 
 
 def Q(X, eps):
-    inputs = tf.concat(1, [X, eps])
+    inputs = tf.concat([X, eps], axis=1)
     h = tf.nn.relu(tf.matmul(inputs, Q_W1) + Q_b1)
     z = tf.matmul(h, Q_W2) + Q_b2
     return z
@@ -64,7 +67,6 @@ def Q(X, eps):
 """ P(X|z) """
 P_W1 = tf.Variable(xavier_init([z_dim, h_dim]))
 P_b1 = tf.Variable(tf.zeros(shape=[h_dim]))
-
 P_W2 = tf.Variable(xavier_init([h_dim, X_dim]))
 P_b2 = tf.Variable(tf.zeros(shape=[X_dim]))
 
@@ -79,42 +81,41 @@ def P(z):
 
 
 """ D(z) """
-D_W1 = tf.Variable(xavier_init([z_dim, h_dim]))
+D_W1 = tf.Variable(xavier_init([X_dim + z_dim, h_dim]))
 D_b1 = tf.Variable(tf.zeros(shape=[h_dim]))
-
 D_W2 = tf.Variable(xavier_init([h_dim, 1]))
 D_b2 = tf.Variable(tf.zeros(shape=[1]))
 
 theta_D = [D_W1, D_W2, D_b1, D_b2]
 
 
-def D(z):
-    h = tf.nn.relu(tf.matmul(z, D_W1) + D_b1)
-    logits = tf.matmul(h, D_W2) + D_b2
-    prob = tf.nn.sigmoid(logits)
-    return prob
+def D(X, z):
+    inputs = tf.concat([X, z], axis=1)
+    h = tf.nn.relu(tf.matmul(inputs, D_W1) + D_b1)
+    return tf.matmul(h, D_W2) + D_b2
 
 
 """ Training """
 z_sample = Q(X, eps)
-_, logits = P(z_sample)
+_, X_logits = P(z_sample)
+D_sample = D(X, z_sample)
+
+D_q = tf.nn.sigmoid(D(X, z_sample))
+D_prior = tf.nn.sigmoid(D(X, z))
 
 # Sample from random z
 X_samples, _ = P(z)
 
-# E[log P(X|z)]
-recon_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits, X))
+disc = tf.reduce_mean(-D_sample)
+loglike = -tf.reduce_mean(
+    tf.nn.sigmoid_cross_entropy_with_logits(logits=X_logits, labels=X)
+)
 
-# Adversarial loss to approx. Q(z|X)
-D_real = D(z)
-D_fake = D(z_sample)
+elbo = disc + loglike
+D_loss = tf.reduce_mean(log(D_q) + log(1. - D_prior))
 
-D_loss = -tf.reduce_mean(tf.log(D_real) + tf.log(1. - D_fake))
-G_loss = -tf.reduce_mean(tf.log(D_fake))
-
-AE_solver = tf.train.AdamOptimizer().minimize(recon_loss, var_list=theta_P + theta_Q)
-D_solver = tf.train.AdamOptimizer().minimize(D_loss, var_list=theta_D)
-G_solver = tf.train.AdamOptimizer().minimize(G_loss, var_list=theta_Q)
+VAE_solver = tf.train.AdamOptimizer().minimize(-elbo, var_list=theta_P+theta_Q)
+D_solver = tf.train.AdamOptimizer().minimize(-D_loss, var_list=theta_D)
 
 sess = tf.Session()
 sess.run(tf.initialize_all_variables())
@@ -129,18 +130,15 @@ for it in range(1000000):
     eps_mb = np.random.randn(mb_size, eps_dim)
     z_mb = np.random.randn(mb_size, z_dim)
 
-    _, recon_loss_curr = sess.run([AE_solver, recon_loss],
-                                  feed_dict={X: X_mb, eps: eps_mb})
+    _, elbo_curr = sess.run([VAE_solver, elbo],
+                            feed_dict={X: X_mb, eps: eps_mb, z: z_mb})
 
     _, D_loss_curr = sess.run([D_solver, D_loss],
                               feed_dict={X: X_mb, eps: eps_mb, z: z_mb})
 
-    _, G_loss_curr = sess.run([G_solver, G_loss],
-                              feed_dict={X: X_mb, eps: eps_mb})
-
     if it % 1000 == 0:
-        print('Iter: {}; D_loss: {:.4}; G_loss: {:.4}; Recon_loss: {:.4}'
-              .format(it, D_loss_curr, G_loss_curr, recon_loss_curr))
+        print('Iter: {}; ELBO: {:.4}; D_Loss: {:.4}'
+              .format(it, elbo_curr, D_loss_curr))
 
         samples = sess.run(X_samples, feed_dict={z: np.random.randn(16, z_dim)})
 
