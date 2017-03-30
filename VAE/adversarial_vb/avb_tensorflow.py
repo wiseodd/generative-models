@@ -107,9 +107,11 @@ D_prior = tf.nn.sigmoid(D(X, z))
 X_samples, _ = P(z)
 
 disc = tf.reduce_mean(-D_sample)
-loglike = -tf.reduce_mean(
-    tf.nn.sigmoid_cross_entropy_with_logits(logits=X_logits, labels=X)
+nll = tf.reduce_sum(
+    tf.nn.sigmoid_cross_entropy_with_logits(logits=X_logits, labels=X),
+    axis=1
 )
+loglike = -tf.reduce_mean(nll)
 
 elbo = disc + loglike
 D_loss = tf.reduce_mean(log(D_q) + log(1. - D_prior))

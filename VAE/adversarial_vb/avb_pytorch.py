@@ -83,7 +83,7 @@ for it in range(1000000):
     T_sample = T(torch.cat([X, z_sample], 1))
 
     disc = torch.mean(-T_sample)
-    loglike = -nn.binary_cross_entropy(X_sample, X)
+    loglike = -nn.binary_cross_entropy(X_sample, X, size_average=False) / mb_size
 
     elbo = -(disc + loglike)
 
