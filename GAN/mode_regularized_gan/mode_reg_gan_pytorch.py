@@ -23,6 +23,10 @@ lam1 = 1e-2
 lam2 = 1e-2
 
 
+def log(x):
+    return torch.log(x + 1e-8)
+
+
 E = torch.nn.Sequential(
     torch.nn.Linear(X_dim, h_dim),
     torch.nn.ReLU(),
@@ -78,7 +82,7 @@ for it in range(1000000):
     D_real = D(X)
     D_fake = D(G_sample)
 
-    D_loss = -torch.mean(torch.log(D_real) + torch.log(1 - D_fake))
+    D_loss = -torch.mean(log(D_real) + log(1 - D_fake))
 
     D_loss.backward()
     D_solver.step()
@@ -98,7 +102,8 @@ for it in range(1000000):
     D_reg = D(G_sample_reg)
 
     mse = torch.sum((X - G_sample_reg)**2, 1)
-    G_loss = -torch.mean(torch.log(D_fake)) + torch.mean(lam1 * mse + lam2 * D_reg)
+    reg = torch.mean(lam1 * mse + lam2 * log(D_reg))
+    G_loss = -torch.mean(log(D_fake)) + reg
 
     G_loss.backward()
     G_solver.step()
@@ -115,7 +120,7 @@ for it in range(1000000):
     D_reg = D(G_sample_reg)
 
     mse = torch.sum((X - G_sample_reg)**2, 1)
-    E_loss = torch.mean(lam1 * mse + lam2 * D_reg)
+    E_loss = torch.mean(lam1 * mse + lam2 * log(D_reg))
 
     E_loss.backward()
     E_solver.step()

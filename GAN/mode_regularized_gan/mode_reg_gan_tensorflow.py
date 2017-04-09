@@ -38,6 +38,10 @@ def xavier_init(size):
     return tf.random_normal(shape=size, stddev=xavier_stddev)
 
 
+def log(x):
+    return tf.log(x + 1e-8)
+
+
 X = tf.placeholder(tf.float32, shape=[None, X_dim])
 z = tf.placeholder(tf.float32, shape=[None, z_dim])
 
@@ -95,9 +99,9 @@ D_reg = discriminator(G_sample_reg)
 
 mse = tf.reduce_sum((X - G_sample_reg)**2, 1)
 
-D_loss = -tf.reduce_mean(tf.log(D_real) + tf.log(1 - D_fake))
-E_loss = tf.reduce_mean(lam1 * mse + lam2 * D_reg)
-G_loss = -tf.reduce_mean(tf.log(D_fake)) + E_loss
+D_loss = -tf.reduce_mean(log(D_real) + log(1 - D_fake))
+E_loss = tf.reduce_mean(lam1 * mse + lam2 * log(D_reg))
+G_loss = -tf.reduce_mean(log(D_fake)) + E_loss
 
 E_solver = (tf.train.AdamOptimizer(learning_rate=1e-3)
             .minimize(E_loss, var_list=theta_E))
