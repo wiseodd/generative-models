@@ -25,6 +25,7 @@ Generated samples will be stored in `GAN/{gan_model}/out` or `VAE/{vae_model}/ou
   16. [Improved Training for Wasserstein GAN](https://arxiv.org/abs/1704.00028)
   17. [DualGAN](https://arxiv.org/abs/1704.02510)
   18. [MAGAN: Margin Adaptation for GAN](https://arxiv.org/abs/1704.03817)
+  19. [Softmax GAN](https://arxiv.org/abs/1704.06191)
 #### Variational Autoencoder (VAE)
   1. [Vanilla VAE](https://arxiv.org/abs/1312.6114)
   2. [Conditional VAE](https://arxiv.org/abs/1406.5298)
