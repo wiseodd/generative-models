@@ -84,7 +84,7 @@ D_fake = D(G_sample)
 D_target = 1./mb_size
 G_target = 1./(mb_size*2)
 
-Z = tf.reduce_mean(tf.exp(-D_real)) + tf.reduce_mean(tf.exp(-D_fake))
+Z = tf.reduce_sum(tf.exp(-D_real)) + tf.reduce_sum(tf.exp(-D_fake))
 
 D_loss = tf.reduce_sum(D_target * D_real) + log(Z)
 G_loss = tf.reduce_sum(G_target * D_real) + tf.reduce_sum(G_target * D_fake) + log(Z)
