@@ -38,20 +38,29 @@ def xavier_init(size):
     return tf.random_normal(shape=size, stddev=xavier_stddev)
 
 
+def log(x):
+    return tf.log(x + 1e-8)
+
+
 X = tf.placeholder(tf.float32, shape=[None, X_dim])
 z = tf.placeholder(tf.float32, shape=[None, z_dim])
 
-D_W1 = tf.Variable(xavier_init([X_dim, h_dim]))
+D_W1 = tf.Variable(xavier_init([X_dim + z_dim, h_dim]))
 D_b1 = tf.Variable(tf.zeros(shape=[h_dim]))
 D_W2 = tf.Variable(xavier_init([h_dim, 1]))
 D_b2 = tf.Variable(tf.zeros(shape=[1]))
 
-G_W1 = tf.Variable(xavier_init([z_dim, h_dim]))
-G_b1 = tf.Variable(tf.zeros(shape=[h_dim]))
-G_W2 = tf.Variable(xavier_init([h_dim, X_dim]))
-G_b2 = tf.Variable(tf.zeros(shape=[X_dim]))
+Q_W1 = tf.Variable(xavier_init([X_dim, h_dim]))
+Q_b1 = tf.Variable(tf.zeros(shape=[h_dim]))
+Q_W2 = tf.Variable(xavier_init([h_dim, z_dim]))
+Q_b2 = tf.Variable(tf.zeros(shape=[z_dim]))
 
-theta_G = [G_W1, G_W2, G_b1, G_b2]
+P_W1 = tf.Variable(xavier_init([z_dim, h_dim]))
+P_b1 = tf.Variable(tf.zeros(shape=[h_dim]))
+P_W2 = tf.Variable(xavier_init([h_dim, X_dim]))
+P_b2 = tf.Variable(tf.zeros(shape=[X_dim]))
+
+theta_G = [Q_W1, Q_W2, Q_b1, Q_b2, P_W1, P_W2, P_b1, P_b2]
 theta_D = [D_W1, D_W2, D_b1, D_b2]
 
 
@@ -59,49 +68,32 @@ def sample_z(m, n):
     return np.random.uniform(-1., 1., size=[m, n])
 
 
-def generator(z):
-    G_h1 = tf.nn.relu(tf.matmul(z, G_W1) + G_b1)
-    G_log_prob = tf.matmul(G_h1, G_W2) + G_b2
-    G_prob = tf.nn.sigmoid(G_log_prob)
-    return G_prob
+def Q(X):
+    h = tf.nn.relu(tf.matmul(X, Q_W1) + Q_b1)
+    h = tf.matmul(h, Q_W2) + Q_b2
+    return h
 
 
-def discriminator(x):
-    D_h1 = tf.nn.relu(tf.matmul(x, D_W1) + D_b1)
-    out = tf.matmul(D_h1, D_W2) + D_b2
-    return out
+def P(z):
+    h = tf.nn.relu(tf.matmul(z, P_W1) + P_b1)
+    h = tf.matmul(h, P_W2) + P_b2
+    return tf.nn.sigmoid(h)
 
 
-G_sample = generator(z)
+def D(X, z):
+    inputs = tf.concat([X, z], axis=1)
+    h = tf.nn.relu(tf.matmul(inputs, D_W1) + D_b1)
+    return tf.nn.sigmoid(tf.matmul(h, D_W2) + D_b2)
 
-D_real = discriminator(X)
-D_fake = discriminator(G_sample)
 
-# Uncomment D_loss and its respective G_loss of your choice
-# ---------------------------------------------------------
+z_hat = Q(X)
+X_hat = P(z)
 
-""" Total Variation """
-# D_loss = -(tf.reduce_mean(0.5 * tf.nn.tanh(D_real)) -
-#            tf.reduce_mean(0.5 * tf.nn.tanh(D_fake)))
-# G_loss = -tf.reduce_mean(0.5 * tf.nn.tanh(D_fake))
+D_enc = D(X, z_hat)
+D_gen = D(X_hat, z)
 
-""" Forward KL """
-# D_loss = -(tf.reduce_mean(D_real) - tf.reduce_mean(tf.exp(D_fake - 1)))
-# G_loss = -tf.reduce_mean(tf.exp(D_fake - 1))
-
-""" Reverse KL """
-# D_loss = -(tf.reduce_mean(-tf.exp(D_real)) - tf.reduce_mean(-1 - D_fake))
-# G_loss = -tf.reduce_mean(-1 - D_fake)
-
-""" Pearson Chi-squared """
-D_loss = -(tf.reduce_mean(D_real) - tf.reduce_mean(0.25*D_fake**2 + D_fake))
-G_loss = -tf.reduce_mean(0.25*D_fake**2 + D_fake)
-
-""" Squared Hellinger """
-# D_loss = -(tf.reduce_mean(1 - tf.exp(D_real)) -
-#            tf.reduce_mean((1 - tf.exp(D_fake)) / (tf.exp(D_fake))))
-# G_loss = -tf.reduce_mean((1 - tf.exp(D_fake)) / (tf.exp(D_fake)))
-
+D_loss = -tf.reduce_mean(log(D_enc) + log(1 - D_gen))
+G_loss = -tf.reduce_mean(log(D_gen) + log(1 - D_enc))
 
 D_solver = (tf.train.AdamOptimizer(learning_rate=lr)
             .minimize(D_loss, var_list=theta_D))
@@ -120,14 +112,19 @@ for it in range(1000000):
     X_mb, _ = mnist.train.next_batch(mb_size)
     z_mb = sample_z(mb_size, z_dim)
 
-    _, D_loss_curr = sess.run([D_solver, D_loss], feed_dict={X: X_mb, z: z_mb})
-    _, G_loss_curr = sess.run([G_solver, G_loss], feed_dict={z: z_mb})
+    _, D_loss_curr = sess.run(
+        [D_solver, D_loss], feed_dict={X: X_mb, z: z_mb}
+    )
+
+    _, G_loss_curr = sess.run(
+        [G_solver, G_loss], feed_dict={X: X_mb, z: z_mb}
+    )
 
     if it % 1000 == 0:
         print('Iter: {}; D_loss: {:.4}; G_loss: {:.4}'
               .format(it, D_loss_curr, G_loss_curr))
 
-        samples = sess.run(G_sample, feed_dict={z: sample_z(16, z_dim)})
+        samples = sess.run(X_hat, feed_dict={z: sample_z(16, z_dim)})
 
         fig = plot(samples)
         plt.savefig('out/{}.png'

@@ -92,7 +92,7 @@ _, logits = P(z_sample)
 X_samples, _ = P(z)
 
 # E[log P(X|z)]
-recon_loss = tf.reduce_sum(tf.nn.sigmoid_cross_entropy_with_logits(logits, X), 1)
+recon_loss = tf.reduce_sum(tf.nn.sigmoid_cross_entropy_with_logits(logits=logits, labels=X), 1)
 # D_KL(Q(z|X) || P(z|X)); calculate in closed form as both dist. are Gaussian
 kl_loss = 0.5 * tf.reduce_sum(tf.exp(z_logvar) + z_mu**2 - 1. - z_logvar, 1)
 # VAE loss
@@ -101,7 +101,7 @@ vae_loss = tf.reduce_mean(recon_loss + kl_loss)
 solver = tf.train.AdamOptimizer().minimize(vae_loss)
 
 sess = tf.Session()
-sess.run(tf.initialize_all_variables())
+sess.run(tf.global_variables_initializer())
 
 if not os.path.exists('out/'):
     os.makedirs('out/')

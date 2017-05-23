@@ -51,7 +51,7 @@ G_b2 = tf.Variable(tf.zeros(shape=[X_dim]))
 
 
 def generator(z, c):
-    inputs = tf.concat(1, [z, c])
+    inputs = tf.concat(axis=1, values=[z, c])
     G_h1 = tf.nn.relu(tf.matmul(inputs, G_W1) + G_b1)
     G_log_prob = tf.matmul(G_h1, G_W2) + G_b2
     G_prob = tf.nn.sigmoid(G_log_prob)
@@ -82,7 +82,7 @@ def sample_z(m, n):
 
 
 def cross_entropy(logit, y):
-    return -tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logit, y))
+    return -tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logit, labels=y))
 
 
 G_sample = generator(z, y)
@@ -108,7 +108,7 @@ G_solver = (tf.train.AdamOptimizer(learning_rate=lr)
 
 
 sess = tf.Session()
-sess.run(tf.initialize_all_variables())
+sess.run(tf.global_variables_initializer())
 
 if not os.path.exists('out/'):
     os.makedirs('out/')

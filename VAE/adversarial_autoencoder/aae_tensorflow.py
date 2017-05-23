@@ -99,7 +99,7 @@ _, logits = P(z_sample)
 X_samples, _ = P(z)
 
 # E[log P(X|z)]
-recon_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits, X))
+recon_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=logits, labels=X))
 
 # Adversarial loss to approx. Q(z|X)
 D_real = D(z)
@@ -113,7 +113,7 @@ D_solver = tf.train.AdamOptimizer().minimize(D_loss, var_list=theta_D)
 G_solver = tf.train.AdamOptimizer().minimize(G_loss, var_list=theta_Q)
 
 sess = tf.Session()
-sess.run(tf.initialize_all_variables())
+sess.run(tf.global_variables_initializer())
 
 if not os.path.exists('out/'):
     os.makedirs('out/')

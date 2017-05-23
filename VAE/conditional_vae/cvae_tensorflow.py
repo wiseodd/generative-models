@@ -56,7 +56,7 @@ Q_b2_sigma = tf.Variable(tf.zeros(shape=[z_dim]))
 
 
 def Q(X, c):
-    inputs = tf.concat(1, [X, c])
+    inputs = tf.concat(axis=1, values=[X, c])
     h = tf.nn.relu(tf.matmul(inputs, Q_W1) + Q_b1)
     z_mu = tf.matmul(h, Q_W2_mu) + Q_b2_mu
     z_logvar = tf.matmul(h, Q_W2_sigma) + Q_b2_sigma
@@ -78,7 +78,7 @@ P_b2 = tf.Variable(tf.zeros(shape=[X_dim]))
 
 
 def P(z, c):
-    inputs = tf.concat(1, [z, c])
+    inputs = tf.concat(axis=1, values=[z, c])
     h = tf.nn.relu(tf.matmul(inputs, P_W1) + P_b1)
     logits = tf.matmul(h, P_W2) + P_b2
     prob = tf.nn.sigmoid(logits)
@@ -95,7 +95,7 @@ _, logits = P(z_sample, c)
 X_samples, _ = P(z, c)
 
 # E[log P(X|z)]
-recon_loss = tf.reduce_sum(tf.nn.sigmoid_cross_entropy_with_logits(logits, X), 1)
+recon_loss = tf.reduce_sum(tf.nn.sigmoid_cross_entropy_with_logits(logits=logits, labels=X), 1)
 # D_KL(Q(z|X) || P(z|X)); calculate in closed form as both dist. are Gaussian
 kl_loss = 0.5 * tf.reduce_sum(tf.exp(z_logvar) + z_mu**2 - 1. - z_logvar, 1)
 # VAE loss
@@ -104,7 +104,7 @@ vae_loss = tf.reduce_mean(recon_loss + kl_loss)
 solver = tf.train.AdamOptimizer().minimize(vae_loss)
 
 sess = tf.Session()
-sess.run(tf.initialize_all_variables())
+sess.run(tf.global_variables_initializer())
 
 if not os.path.exists('out/'):
     os.makedirs('out/')

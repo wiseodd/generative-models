@@ -9,12 +9,12 @@ import matplotlib.gridspec as gridspec
 import os
 from torch.autograd import Variable
 from tensorflow.examples.tutorials.mnist import input_data
+from itertools import *
 
 
 mnist = input_data.read_data_sets('../../MNIST_data', one_hot=True)
 mb_size = 32
 z_dim = 10
-eps_dim = 4
 X_dim = mnist.train.images.shape[1]
 y_dim = mnist.train.labels.shape[1]
 h_dim = 128
@@ -26,14 +26,14 @@ def log(x):
     return torch.log(x + 1e-8)
 
 
-# Encoder: q(z|x,eps)
+# Inference net (Encoder) Q(z|X)
 Q = torch.nn.Sequential(
-    torch.nn.Linear(X_dim + eps_dim, h_dim),
+    torch.nn.Linear(X_dim, h_dim),
     torch.nn.ReLU(),
     torch.nn.Linear(h_dim, z_dim)
 )
 
-# Decoder: p(x|z)
+# Generator net (Decoder) P(X|z)
 P = torch.nn.Sequential(
     torch.nn.Linear(z_dim, h_dim),
     torch.nn.ReLU(),
@@ -41,72 +41,65 @@ P = torch.nn.Sequential(
     torch.nn.Sigmoid()
 )
 
-# Discriminator: T(X, z)
-T = torch.nn.Sequential(
+D_ = torch.nn.Sequential(
     torch.nn.Linear(X_dim + z_dim, h_dim),
     torch.nn.ReLU(),
-    torch.nn.Linear(h_dim, 1)
+    torch.nn.Linear(h_dim, 1),
+    torch.nn.Sigmoid()
 )
+
+
+def D(X, z):
+    return D_(torch.cat([X, z], 1))
 
 
 def reset_grad():
     Q.zero_grad()
     P.zero_grad()
-    T.zero_grad()
+    D_.zero_grad()
 
 
-def sample_X(size, include_y=False):
-    X, y = mnist.train.next_batch(size)
-    X = Variable(torch.from_numpy(X))
-
-    if include_y:
-        y = np.argmax(y, axis=1).astype(np.int)
-        y = Variable(torch.from_numpy(y))
-        return X, y
-
-    return X
-
-
-Q_solver = optim.Adam(Q.parameters(), lr=lr)
-P_solver = optim.Adam(P.parameters(), lr=lr)
-T_solver = optim.Adam(T.parameters(), lr=lr)
+G_solver = optim.Adam(chain(Q.parameters(), P.parameters()), lr=lr)
+D_solver = optim.Adam(D_.parameters(), lr=lr)
 
 
 for it in range(1000000):
-    X = sample_X(mb_size)
-    eps = Variable(torch.randn(mb_size, eps_dim))
+    # Sample data
     z = Variable(torch.randn(mb_size, z_dim))
+    X, _ = mnist.train.next_batch(mb_size)
+    X = Variable(torch.from_numpy(X))
 
-    # Optimize VAE
-    z_sample = Q(torch.cat([X, eps], 1))
-    X_sample = P(z_sample)
-    T_sample = T(torch.cat([X, z_sample], 1))
+    # Discriminator
+    z_hat = Q(X)
+    X_hat = P(z)
 
-    disc = torch.mean(-T_sample)
-    loglike = -nn.binary_cross_entropy(X_sample, X, size_average=False) / mb_size
+    D_enc = D(X, z_hat)
+    D_gen = D(X_hat, z)
 
-    elbo = -(disc + loglike)
+    D_loss = -torch.mean(log(D_enc) + log(1 - D_gen))
 
-    elbo.backward()
-    Q_solver.step()
-    P_solver.step()
+    D_loss.backward()
+    D_solver.step()
+    G_solver.step()
     reset_grad()
 
-    # Discriminator T(X, z)
-    z_sample = Q(torch.cat([X, eps], 1))
-    T_q = nn.sigmoid(T(torch.cat([X, z_sample], 1)))
-    T_prior = nn.sigmoid(T(torch.cat([X, z], 1)))
+    # Autoencoder Q, P
+    z_hat = Q(X)
+    X_hat = P(z)
 
-    T_loss = -torch.mean(log(T_q) + log(1. - T_prior))
+    D_enc = D(X, z_hat)
+    D_gen = D(X_hat, z)
 
-    T_loss.backward()
-    T_solver.step()
+    G_loss = -torch.mean(log(D_gen) + log(1 - D_enc))
+
+    G_loss.backward()
+    G_solver.step()
     reset_grad()
 
     # Print and plot every now and then
     if it % 1000 == 0:
-        print('Iter-{}; ELBO: {:.4}; T_loss: {:.4}'
-              .format(it, -elbo.data[0], -T_loss.data[0]))
+        print('Iter-{}; D_loss: {:.4}; G_loss: {:.4}'
+              .format(it, D_loss.data[0], G_loss.data[0]))
 
         samples = P(z).data.numpy()[:16]
 
@@ -125,7 +118,6 @@ for it in range(1000000):
         if not os.path.exists('out/'):
             os.makedirs('out/')
 
-        plt.savefig('out/{}.png'
-                    .format(str(cnt).zfill(3)), bbox_inches='tight')
+        plt.savefig('out/{}.png'.format(str(cnt).zfill(3)), bbox_inches='tight')
         cnt += 1
         plt.close(fig)

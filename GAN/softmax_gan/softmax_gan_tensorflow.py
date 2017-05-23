@@ -11,7 +11,7 @@ X_dim = 784
 z_dim = 64
 h_dim = 128
 lr = 1e-3
-m = 5
+d_steps = 3
 
 mnist = input_data.read_data_sets('../../MNIST_data', one_hot=True)
 
@@ -38,13 +38,17 @@ def xavier_init(size):
     return tf.random_normal(shape=size, stddev=xavier_stddev)
 
 
+def log(x):
+    return tf.log(x + 1e-8)
+
+
 X = tf.placeholder(tf.float32, shape=[None, X_dim])
 z = tf.placeholder(tf.float32, shape=[None, z_dim])
 
 D_W1 = tf.Variable(xavier_init([X_dim, h_dim]))
 D_b1 = tf.Variable(tf.zeros(shape=[h_dim]))
-D_W2 = tf.Variable(xavier_init([h_dim, X_dim]))
-D_b2 = tf.Variable(tf.zeros(shape=[X_dim]))
+D_W2 = tf.Variable(xavier_init([h_dim, 1]))
+D_b2 = tf.Variable(tf.zeros(shape=[1]))
 
 G_W1 = tf.Variable(xavier_init([z_dim, h_dim]))
 G_b1 = tf.Variable(tf.zeros(shape=[h_dim]))
@@ -59,27 +63,31 @@ def sample_z(m, n):
     return np.random.uniform(-1., 1., size=[m, n])
 
 
-def generator(z):
+def G(z):
     G_h1 = tf.nn.relu(tf.matmul(z, G_W1) + G_b1)
     G_log_prob = tf.matmul(G_h1, G_W2) + G_b2
     G_prob = tf.nn.sigmoid(G_log_prob)
     return G_prob
 
 
-def discriminator(X):
+def D(X):
     D_h1 = tf.nn.relu(tf.matmul(X, D_W1) + D_b1)
-    X_recon = tf.matmul(D_h1, D_W2) + D_b2
-    mse = tf.reduce_mean(tf.reduce_sum((X - X_recon)**2, 1))
-    return mse
+    out = tf.matmul(D_h1, D_W2) + D_b2
+    return out
 
 
-G_sample = generator(z)
+G_sample = G(z)
 
-D_real = discriminator(X)
-D_fake = discriminator(G_sample)
+D_real = D(X)
+D_fake = D(G_sample)
 
-D_loss = D_real + tf.maximum(0., m - D_fake)
-G_loss = D_fake
+D_target = 1./mb_size
+G_target = 1./(mb_size*2)
+
+Z = tf.reduce_sum(tf.exp(-D_real)) + tf.reduce_sum(tf.exp(-D_fake))
+
+D_loss = tf.reduce_sum(D_target * D_real) + log(Z)
+G_loss = tf.reduce_sum(G_target * D_real) + tf.reduce_sum(G_target * D_fake) + log(Z)
 
 D_solver = (tf.train.AdamOptimizer(learning_rate=lr)
             .minimize(D_loss, var_list=theta_D))
@@ -98,10 +106,12 @@ for it in range(1000000):
     X_mb, _ = mnist.train.next_batch(mb_size)
     z_mb = sample_z(mb_size, z_dim)
 
-    _, D_loss_curr = sess.run([D_solver, D_loss], feed_dict={X: X_mb, z: z_mb})
+    _, D_loss_curr = sess.run(
+        [D_solver, D_loss], feed_dict={X: X_mb, z: z_mb}
+    )
 
     _, G_loss_curr = sess.run(
-        [G_solver, G_loss], feed_dict={X: X_mb, z: sample_z(mb_size, z_dim)}
+        [G_solver, G_loss], feed_dict={X: X_mb, z: z_mb}
     )
 
     if it % 1000 == 0:
