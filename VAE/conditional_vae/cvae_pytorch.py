@@ -97,7 +97,9 @@ for it in range(100000):
 
     # Housekeeping
     for p in params:
-        p.grad.data.zero_()
+        if p.grad is not None:
+            data = p.grad.data
+            p.grad = Variable(data.new().resize_as_(data).zero_())
 
     # Print and plot every now and then
     if it % 1000 == 0:

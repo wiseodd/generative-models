@@ -98,3 +98,5 @@ out/
 GAN/unrolled_gan/
 GAN/loss_sensitive_gan/
 GAN/generative_adversarial_parallelization/gap_tensorflow.py
+
+.vscode
