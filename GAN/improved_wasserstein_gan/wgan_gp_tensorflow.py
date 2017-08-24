@@ -86,7 +86,7 @@ eps = tf.random_uniform([mb_size, 1], minval=0., maxval=1.)
 X_inter = eps*X + (1. - eps)*G_sample
 grad = tf.gradients(D(X_inter), [X_inter])[0]
 grad_norm = tf.sqrt(tf.reduce_sum((grad)**2, axis=1))
-grad_pen = lam * tf.reduce_mean(grad_norm - 1.)**2
+grad_pen = lam * tf.reduce_mean((grad_norm - 1)**2)
 
 D_loss = tf.reduce_mean(D_fake) - tf.reduce_mean(D_real) + grad_pen
 G_loss = -tf.reduce_mean(D_fake)
