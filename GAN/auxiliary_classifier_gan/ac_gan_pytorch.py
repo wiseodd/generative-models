@@ -46,7 +46,6 @@ D_gan = torch.nn.Sequential(
 
 D_aux = torch.nn.Sequential(
     torch.nn.Linear(h_dim, y_dim),
-    torch.nn.Softmax()
 )
 
 
