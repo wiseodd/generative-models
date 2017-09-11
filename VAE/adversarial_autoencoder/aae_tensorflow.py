@@ -5,7 +5,6 @@ import matplotlib.gridspec as gridspec
 import os
 from tensorflow.examples.tutorials.mnist import input_data
 
-
 mnist = input_data.read_data_sets('../../MNIST_data', one_hot=True)
 mb_size = 32
 z_dim = 10
@@ -14,7 +13,6 @@ y_dim = mnist.train.labels.shape[1]
 h_dim = 128
 c = 0
 lr = 1e-3
-
 
 def plot(samples):
     fig = plt.figure(figsize=(4, 4))
@@ -89,7 +87,6 @@ def D(z):
     logits = tf.matmul(h, D_W2) + D_b2
     prob = tf.nn.sigmoid(logits)
     return prob
-
 
 """ Training """
 z_sample = Q(X)
