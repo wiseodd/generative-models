@@ -22,12 +22,12 @@ def sigm(x):
     return 1/(1 + np.exp(-x))
 
 
-def inference(X):
+def infer(X):
     # mb_size x x_dim -> mb_size x h_dim
     return sigm(X @ W)
 
 
-def recognition(H):
+def generate(H):
     # mb_size x h_dim -> mb_size x x_dim
     return sigm(H @ W.T)
 
@@ -45,7 +45,7 @@ for t in range(1, 101):
 
     for v in X_mb:
         # E[h|v,W]
-        mu = inference(v)
+        mu = infer(v)
 
         # Gibbs sampling steps
         # --------------------
@@ -53,12 +53,12 @@ for t in range(1, 101):
 
         for k in range(K):
             # h ~ p(h|v,W)
-            h_prime = np.random.binomial(n=1, p=inference(v_prime))
+            h_prime = np.random.binomial(n=1, p=infer(v_prime))
             # v ~ p(v|h,W)
-            v_prime = np.random.binomial(n=1, p=recognition(h_prime))
+            v_prime = np.random.binomial(n=1, p=generate(h_prime))
 
         # E[h|v',W]
-        mu_prime = inference(v_prime)
+        mu_prime = infer(v_prime)
 
         # Compute data gradient
         grad_w = np.outer(v, mu) - np.outer(v_prime, mu_prime)
@@ -91,8 +91,8 @@ def plot(samples, size, name):
 
 X, _ = mnist.test.next_batch(mb_size)
 
-H = inference(X)
+H = np.random.binomial(n=1, p=infer(X))
 plot(H, np.sqrt(h_dim), 'H')
 
-X_recon = recognition(H)
+X_recon = generate(H)
 plot(X_recon, np.sqrt(X_dim), 'V')

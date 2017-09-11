@@ -22,12 +22,12 @@ def sigm(x):
     return 1/(1 + np.exp(-x))
 
 
-def inference(X):
+def infer(X):
     # mb_size x x_dim -> mb_size x h_dim
     return sigm(X @ W)
 
 
-def recognition(H):
+def generate(H):
     # mb_size x h_dim -> mb_size x x_dim
     return sigm(H @ W.T)
 
@@ -47,16 +47,16 @@ for t in range(1, 101):
     X_mb, _ = mnist.train.next_batch(mb_size)
     g = 0
 
-    Mu = inference(X_mb)
+    Mu = infer(X_mb)
 
     # Gibbs sampling step
     # -------------------
     for i, v_s in enumerate(V_s):
         for k in range(K):
             # h ~ p(h|v,W)
-            h_prime = np.random.binomial(n=1, p=inference(v_s))
+            h_prime = np.random.binomial(n=1, p=infer(v_s))
             # v ~ p(v|h,W)
-            v_prime = np.random.binomial(n=1, p=recognition(h_prime))
+            v_prime = np.random.binomial(n=1, p=generate(h_prime))
 
         # Replace with new sample
         V_s[i] = v_prime
@@ -94,8 +94,8 @@ def plot(samples, size, name):
 
 X, _ = mnist.test.next_batch(mb_size)
 
-H = inference(X)
+H = np.random.binomial(n=1, p=infer(X))
 plot(H, np.sqrt(h_dim), 'H')
 
-X_recon = recognition(H)
+X_recon = generate(H)
 plot(X_recon, np.sqrt(X_dim), 'V')
