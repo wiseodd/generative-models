@@ -44,7 +44,7 @@ V_s = sigm(np.random.randn(mb_size, X_dim))
 H_s = np.random.binomial(n=1, p=0.5, size=[mb_size, h_dim])
 
 for t in range(1, 101):
-    X_mb, _ = mnist.train.next_batch(mb_size)
+    X_mb = (mnist.train.next_batch(mb_size)[0] > 0.5).astype(np.float)
     g = 0
 
     Mu = infer(X_mb)
@@ -92,10 +92,10 @@ def plot(samples, size, name):
     plt.close(fig)
 
 
-X, _ = mnist.test.next_batch(mb_size)
+X = (mnist.test.next_batch(mb_size)[0] > 0.5).astype(np.float)
 
 H = np.random.binomial(n=1, p=infer(X))
 plot(H, np.sqrt(h_dim), 'H')
 
-X_recon = generate(H)
+X_recon = np.random.binomial(n=1, p=generate(H))
 plot(X_recon, np.sqrt(X_dim), 'V')
