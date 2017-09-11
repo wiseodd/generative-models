@@ -1,8 +1,9 @@
 # Generative Models
 Collection of generative models, e.g. GAN, VAE in Pytorch and Tensorflow.
+Also present here are RBM and Helmholtz Machine.
 
 ## Note:
-Generated samples will be stored in `GAN/{gan_model}/out` or `VAE/{vae_model}/out` directory during training.
+Generated samples will be stored in `GAN/{gan_model}/out` (or `VAE/{vae_model}/out`, etc) directory during training.
 
 ## What's in it?
 
