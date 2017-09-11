@@ -38,6 +38,9 @@ Generated samples will be stored in `GAN/{gan_model}/out` or `VAE/{vae_model}/ou
   1. [Binary RBM with Contrastive Divergence](http://www.cs.toronto.edu/~fritz/absps/cdmiguel.pdf)
   2. [Binary RBM with Persistent Contrastive Divergence](http://www.cs.toronto.edu/~tijmen/pcd/pcd.pdf)
 
+#### Helmholtz Machine
+  1. [Binary Helmholtz Machine with Wake-Sleep Algorithm](http://www.cs.toronto.edu/~fritz/absps/ws.pdf)
+
 ## Dependencies
 
 1. Install miniconda <http://conda.pydata.org/miniconda.html>
