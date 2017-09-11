@@ -34,11 +34,12 @@ def recognition(H):
 
 # Contrastive Divergence
 # ----------------------
-# Approximate the log partition gradient using single step Gibbs sampling
+# Approximate the log partition gradient Gibbs sampling
 
 alpha = 0.1
+K = 10  # Num. of Gibbs sampling step
 
-for t in range(1, 11):
+for t in range(1, 101):
     X_mb, _ = mnist.train.next_batch(mb_size)
     g = 0
 
@@ -46,19 +47,21 @@ for t in range(1, 11):
         # E[h|v,W]
         mu = inference(v)
 
-        # Gibbs sampling step
-        # -------------------
-        # h ~ p(h|v,W)
-        h = np.random.binomial(n=1, p=mu)
-        # v ~ p(v|h,W)
-        v_prime = np.random.binomial(n=1, p=recognition(h))
+        # Gibbs sampling steps
+        # --------------------
+        v_prime = np.copy(v)
 
-        # E[v|h,W]
+        for k in range(K):
+            # h ~ p(h|v,W)
+            h_prime = np.random.binomial(n=1, p=inference(v_prime))
+            # v ~ p(v|h,W)
+            v_prime = np.random.binomial(n=1, p=recognition(h_prime))
+
+        # E[h|v',W]
         mu_prime = inference(v_prime)
 
         # Compute data gradient
         grad_w = np.outer(v, mu) - np.outer(v_prime, mu_prime)
-
         # Accumulate minibatch gradient
         g += grad_w
 
