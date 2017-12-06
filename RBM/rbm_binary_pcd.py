@@ -43,7 +43,7 @@ K = 10  # Num. of MC iteration
 V_s = sigm(np.random.randn(mb_size, X_dim))
 H_s = np.random.binomial(n=1, p=0.5, size=[mb_size, h_dim])
 
-for t in range(1, 101):
+for t in range(1, 1001):
     X_mb = (mnist.train.next_batch(mb_size)[0] > 0.5).astype(np.float)
     g = 0
 
@@ -62,13 +62,13 @@ for t in range(1, 101):
         V_s[i] = v_prime
         H_s[i] = h_prime
 
-    # Compute gradient
+    # Compute average gradient
     left = np.array([np.outer(X_mb[i], Mu[i]) for i in range(mb_size)])
     right = np.array([np.outer(V_s[i], H_s[i]) for i in range(mb_size)])
     g = np.mean(left, axis=0) - np.mean(right, axis=0)
 
     # Update
-    W += (alpha/t) * g
+    W += alpha * g  # Maximize likelihood
 
 
 # Visualization

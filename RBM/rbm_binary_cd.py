@@ -16,6 +16,8 @@ mb_size = 16
 h_dim = 36
 
 W = np.random.randn(X_dim, h_dim) * 0.001
+a = np.random.randn(h_dim) * 0.001
+b = np.random.randn(X_dim) * 0.001
 
 
 def sigm(x):
@@ -39,7 +41,7 @@ def generate(H):
 alpha = 0.1
 K = 10  # Num. of Gibbs sampling step
 
-for t in range(1, 101):
+for t in range(1, 1001):
     X_mb = (mnist.train.next_batch(mb_size)[0] > 0.5).astype(np.float)
     g = 0
 
@@ -65,7 +67,8 @@ for t in range(1, 101):
         # Accumulate minibatch gradient
         g += grad_w
 
-    W += (alpha/t) / mb_size * g
+    g *= 1 / mb_size  # Monte carlo gradient
+    W += alpha * g  # Maximize likelihood
 
 
 # Visualization
@@ -94,5 +97,6 @@ X = (mnist.test.next_batch(mb_size)[0] > 0.5).astype(np.float)
 H = np.random.binomial(n=1, p=infer(X))
 plot(H, np.sqrt(h_dim), 'H')
 
-X_recon = np.random.binomial(n=1, p=generate(H))
+# X_recon = np.random.binomial(n=1, p=generate(H))
+X_recon = (generate(H) > 0.5).astype(np.float)
 plot(X_recon, np.sqrt(X_dim), 'V')
