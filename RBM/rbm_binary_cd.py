@@ -8,7 +8,7 @@ from tensorflow.examples.tutorials.mnist import input_data
 if not os.path.exists('out/'):
     os.makedirs('out/')
 
-mnist = input_data.read_data_sets('../../MNIST_data', one_hot=True)
+mnist = input_data.read_data_sets('../MNIST_data', one_hot=True)
 X_dim = mnist.train.images.shape[1]
 y_dim = mnist.train.labels.shape[1]
 
@@ -97,6 +97,5 @@ X = (mnist.test.next_batch(mb_size)[0] > 0.5).astype(np.float)
 H = np.random.binomial(n=1, p=infer(X))
 plot(H, np.sqrt(h_dim), 'H')
 
-# X_recon = np.random.binomial(n=1, p=generate(H))
 X_recon = (generate(H) > 0.5).astype(np.float)
 plot(X_recon, np.sqrt(X_dim), 'V')
