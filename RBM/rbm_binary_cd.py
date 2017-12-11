@@ -44,10 +44,12 @@ K = 10  # Num. of Gibbs sampling step
 for t in range(1, 1001):
     X_mb = (mnist.train.next_batch(mb_size)[0] > 0.5).astype(np.float)
     g = 0
+    g_a = 0
+    g_b = 0
 
     for v in X_mb:
         # E[h|v,W]
-        mu = infer(v)
+        h = infer(v)
 
         # Gibbs sampling steps
         # --------------------
@@ -60,15 +62,27 @@ for t in range(1, 1001):
             v_prime = np.random.binomial(n=1, p=generate(h_prime))
 
         # E[h|v',W]
-        mu_prime = infer(v_prime)
+        h_prime = infer(v_prime)
 
         # Compute data gradient
-        grad_w = np.outer(v, mu) - np.outer(v_prime, mu_prime)
+        grad_w = np.outer(v, h) - np.outer(v_prime, h_prime)
+        grad_a = h - h_prime
+        grad_b = v - v_prime
+
         # Accumulate minibatch gradient
         g += grad_w
+        g_a += grad_a
+        g_b += grad_b
 
-    g *= 1 / mb_size  # Monte carlo gradient
-    W += alpha * g  # Maximize likelihood
+    # Monte carlo gradient
+    g *= 1 / mb_size
+    g_a *= 1 / mb_size
+    g_b *= 1 / mb_size
+
+    # Update to maximize
+    W += alpha * g
+    a += alpha * g_a
+    b += alpha * g_b
 
 
 # Visualization
