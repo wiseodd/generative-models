@@ -3,7 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import os
-from torch.autograd import Variable
 from tensorflow.examples.tutorials.mnist import input_data
 
 
