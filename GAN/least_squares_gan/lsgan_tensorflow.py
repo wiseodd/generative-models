@@ -108,7 +108,7 @@ for it in range(1000000):
 
     _, G_loss_curr = sess.run(
         [G_solver, G_loss],
-        feed_dict={X: X_mb, z: sample_z(mb_size, z_dim)}
+        feed_dict={X: X_mb, z: z_mb}
     )
 
     if it % 1000 == 0:
