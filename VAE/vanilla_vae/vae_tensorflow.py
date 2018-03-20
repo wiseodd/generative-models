@@ -4,16 +4,14 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import os
 from tensorflow.examples.tutorials.mnist import input_data
+import time
 
 
 mnist = input_data.read_data_sets('../../MNIST_data', one_hot=True)
-mb_size = 64
-z_dim = 100
-X_dim = mnist.train.images.shape[1]
-y_dim = mnist.train.labels.shape[1]
-h_dim = 128
-c = 0
-lr = 1e-3
+mb_size = 64                            # Size of mini batch
+z_dim = 100                             # Size of latent variable
+X_dim = mnist.train.images.shape[1]     # Feature Vector length
+h_dim = 128                             # Number of neurons in hidden layer
 
 
 def plot(samples):
@@ -102,10 +100,11 @@ solver = tf.train.AdamOptimizer().minimize(vae_loss)
 sess = tf.Session()
 sess.run(tf.global_variables_initializer())
 
-if not os.path.exists('out/'):
-    os.makedirs('out/')
+img_path = 'out/'+str(time.strftime("%b%d_%H-%M-%S"))
+if not os.path.exists(img_path):
+    os.makedirs(img_path)
 
-i = 0
+i = 0                                   # Variable corresponding to image number
 
 for it in range(1000000):
     X_mb, _ = mnist.train.next_batch(mb_size)
@@ -120,6 +119,6 @@ for it in range(1000000):
         samples = sess.run(X_samples, feed_dict={z: np.random.randn(16, z_dim)})
 
         fig = plot(samples)
-        plt.savefig('out/{}.png'.format(str(i).zfill(3)), bbox_inches='tight')
+        plt.savefig(img_path+'/{}.png'.format(str(i).zfill(3)), bbox_inches='tight')
         i += 1
         plt.close(fig)
