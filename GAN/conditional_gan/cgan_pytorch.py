@@ -76,8 +76,8 @@ def reset_grad():
 G_solver = optim.Adam(G_params, lr=1e-3)
 D_solver = optim.Adam(D_params, lr=1e-3)
 
-ones_label = Variable(torch.ones(mb_size))
-zeros_label = Variable(torch.zeros(mb_size))
+ones_label = Variable(torch.ones(mb_size, 1))
+zeros_label = Variable(torch.zeros(mb_size, 1))
 
 
 for it in range(100000):
