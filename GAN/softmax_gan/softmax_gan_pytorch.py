@@ -68,7 +68,7 @@ for it in range(1000000):
     # Dicriminator
     D_loss = torch.sum(D_target * D_real) + log(Z)
 
-    D_loss.backward(retain_variables=True)
+    D_loss.backward(retain_graph=True)
     D_solver.step()
     reset_grad()
 
