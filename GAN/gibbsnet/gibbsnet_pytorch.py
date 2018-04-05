@@ -85,7 +85,7 @@ for it in range(1000000):
 
     D_loss = -torch.mean(log(p_data) + log(1 - p_model))
 
-    D_loss.backward(retain_variables=True)
+    D_loss.backward(retain_graph=True)
     D_solver.step()
     G_solver.step()
     reset_grad()

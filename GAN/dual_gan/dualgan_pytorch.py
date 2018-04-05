@@ -101,7 +101,7 @@ for it in range(1000000):
 
         D1_loss = -(torch.mean(D1_real) - torch.mean(D1_fake))
 
-        D1_loss.backward(retain_variables=True)
+        D1_loss.backward(retain_graph=True)
         D1_solver.step()
 
         # Weight clipping
