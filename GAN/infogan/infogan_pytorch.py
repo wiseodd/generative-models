@@ -137,8 +137,7 @@ for it in range(100000):
     Q_c_given_x = Q(G_sample)
 
     crossent_loss = torch.mean(-torch.sum(c * torch.log(Q_c_given_x + 1e-8), dim=1))
-    ent_loss = torch.mean(-torch.sum(c * torch.log(c + 1e-8), dim=1))
-    mi_loss = crossent_loss + ent_loss
+    mi_loss = crossent_loss
 
     mi_loss.backward()
     Q_solver.step()

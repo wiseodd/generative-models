@@ -101,8 +101,7 @@ D_loss = -tf.reduce_mean(tf.log(D_real + 1e-8) + tf.log(1 - D_fake + 1e-8))
 G_loss = -tf.reduce_mean(tf.log(D_fake + 1e-8))
 
 cross_ent = tf.reduce_mean(-tf.reduce_sum(tf.log(Q_c_given_x + 1e-8) * c, 1))
-ent = tf.reduce_mean(-tf.reduce_sum(tf.log(c + 1e-8) * c, 1))
-Q_loss = cross_ent + ent
+Q_loss = cross_ent
 
 D_solver = tf.train.AdamOptimizer().minimize(D_loss, var_list=theta_D)
 G_solver = tf.train.AdamOptimizer().minimize(G_loss, var_list=theta_G)
