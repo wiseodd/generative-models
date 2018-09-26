@@ -59,7 +59,6 @@ def reset_grad():
     P.zero_grad()
     D_.zero_grad()
 
-
 G_solver = optim.Adam(chain(Q.parameters(), P.parameters()), lr=lr)
 D_solver = optim.Adam(D_.parameters(), lr=lr)
 
@@ -99,7 +98,7 @@ for it in range(1000000):
     # Print and plot every now and then
     if it % 100 == 0:
         print('Iter-{}; D_loss: {:.4}; G_loss: {:.4}'
-              .format(it, D_loss.data[0], G_loss.data[0]))
+              .format(it, D_loss.item(), G_loss.item()))
 
         z = Variable(torch.randn(mb_size, z_dim))
 

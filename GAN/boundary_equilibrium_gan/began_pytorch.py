@@ -81,14 +81,14 @@ for it in range(1000000):
 
     # Update k, the equlibrium
     k = k + lam * (gamma*D(X) - D(G(z_G)))
-    k = k.data[0]  # k is variable, so unvariable it so that no gradient prop.
+    k = k.item()  # k is variable, so unvariable it so that no gradient prop.
 
     # Print and plot every now and then
     if it % 1000 == 0:
         measure = D(X) + torch.abs(gamma*D(X) - D(G(z_G)))
 
         print('Iter-{}; Convergence measure: {:.4}'
-              .format(it, measure.data[0]))
+              .format(it, measure.item()))
 
         samples = G(z_G).data.numpy()[:16]
 

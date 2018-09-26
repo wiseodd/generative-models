@@ -103,7 +103,7 @@ for it in range(100000):
 
     # Print and plot every now and then
     if it % 1000 == 0:
-        print('Iter-{}; Loss: {:.4}'.format(it, loss.data[0]))
+        print('Iter-{}; Loss: {:.4}'.format(it, loss.item()))
 
         c = np.zeros(shape=[mb_size, y_dim], dtype='float32')
         c[:, np.random.randint(0, 10)] = 1.

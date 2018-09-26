@@ -102,7 +102,7 @@ for it in range(1000000):
     # Print and plot every now and then
     if it % 1000 == 0:
         print('Iter-{}; D_loss: {:.4}; G_loss: {:.4}'
-              .format(it, D_loss.data[0], G_loss.data[0]))
+              .format(it, D_loss.item(), G_loss.item()))
 
         samples = G(z).data.numpy()[:16]
 

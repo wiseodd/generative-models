@@ -129,7 +129,7 @@ for it in range(100000):
         samples = G(z, c).data.numpy()
 
         print('Iter-{}; D_loss: {:.4}; G_loss: {:.4}; Idx: {}'
-              .format(it, -D_loss.data[0], -G_loss.data[0], idx))
+              .format(it, -D_loss.item(), -G_loss.item(), idx))
 
         fig = plt.figure(figsize=(4, 4))
         gs = gridspec.GridSpec(4, 4)
