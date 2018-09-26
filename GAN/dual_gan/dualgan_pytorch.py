@@ -154,7 +154,7 @@ for it in range(1000000):
     # Print and plot every now and then
     if it % 1000 == 0:
         print('Iter-{}; D_loss: {:.4}; G_loss: {:.4}'
-              .format(it, D1_loss.data[0] + D2_loss.data[0], G_loss.data[0]))
+              .format(it, D1_loss.item() + D2_loss.item(), G_loss.item()))
 
         real1 = X1.data.numpy()[:4]
         real2 = X2.data.numpy()[:4]

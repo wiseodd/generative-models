@@ -68,11 +68,11 @@ for it in range(2*n_iter):
     reset_grad()
 
     if it % 1000 == 0:
-        print('Iter-{}; Pretrained D loss: {:.4}'.format(it, loss.data[0]))
+        print('Iter-{}; Pretrained D loss: {:.4}'.format(it, loss.item()))
 
 
 # Initial margin, expected energy of real data
-m = torch.mean(D(Variable(torch.from_numpy(mnist.train.images)))).data[0]
+m = torch.mean(D(Variable(torch.from_numpy(mnist.train.images)))).item()
 s_z_before = torch.from_numpy(np.array([np.inf], dtype='float32'))
 
 

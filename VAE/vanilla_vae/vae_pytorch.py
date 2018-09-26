@@ -100,7 +100,7 @@ for it in range(100000):
 
     # Print and plot every now and then
     if it % 1000 == 0:
-        print('Iter-{}; Loss: {:.4}'.format(it, loss.data[0]))
+        print('Iter-{}; Loss: {:.4}'.format(it, loss.item()))
 
         samples = P(z).data.numpy()[:16]
 

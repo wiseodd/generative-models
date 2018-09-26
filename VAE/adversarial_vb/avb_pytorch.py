@@ -106,7 +106,7 @@ for it in range(1000000):
     # Print and plot every now and then
     if it % 1000 == 0:
         print('Iter-{}; ELBO: {:.4}; T_loss: {:.4}'
-              .format(it, -elbo.data[0], -T_loss.data[0]))
+              .format(it, -elbo.item(), -T_loss.item()))
 
         samples = P(z).data.numpy()[:16]
 

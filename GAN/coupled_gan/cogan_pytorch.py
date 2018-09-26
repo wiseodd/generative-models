@@ -173,8 +173,8 @@ for it in range(100000):
         print('Iter-{}; D1_loss: {:.4}; G1_loss: {:.4}; '
               'D2_loss: {:.4}; G2_loss: {:.4}'
               .format(
-                  it, D1_loss.data[0], G1_loss.data[0],
-                  D2_loss.data[0], G2_loss.data[0])
+                  it, D1_loss.item(), G1_loss.item(),
+                  D2_loss.item(), G2_loss.item())
               )
 
         z = Variable(torch.randn(8, z_dim))
